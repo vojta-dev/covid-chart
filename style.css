@@ -1,0 +1,17 @@
+html {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+body {
+    width: 80%;
+}
+
+img {
+    position: absolute;
+    width: 30px;
+    right: 8px;
+    top: 8px;
+}
