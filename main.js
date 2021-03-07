@@ -1,5 +1,32 @@
-const formatDate = (date) => date.slice(5);
-const formatNum = (num) => num.toLocaleString('cs-CZ', { notation: 'compact' });
+const dict = {
+    selected: 'cs',
+    cs: {
+        lang: 'cs-CZ',
+        infected: 'Nakažených',
+        recoveries: 'Vyléčených',
+        deaths: 'Zemřelých',
+    },
+    en: {
+        lang: 'en-US',
+        infected: 'Infected',
+        recoveries: 'Recoveries',
+        deaths: 'Deaths',
+    },
+};
+
+let d = dict[dict.selected];
+let chart;
+
+// change language
+document.getElementById('flag').addEventListener('click', () => {
+    document.getElementById('flag').setAttribute('src', `img/flag_${dict.selected}.svg`);
+
+    dict.selected = dict.selected === 'cs' ? 'en' : 'cs';
+    d = dict[dict.selected];
+
+    chart.destroy();
+    main();
+});
 
 const getData = async () => {
     const response = await fetch('https://onemocneni-aktualne.mzcr.cz/api/v2/covid-19/nakazeni-vyleceni-umrti-testy.min.json');
@@ -30,7 +57,7 @@ const makeChart = (dates, values) => {
         };
     });
 
-    new Chart('chart', {
+    chart = new Chart('chart', {
         type: 'line',
         data: {
             labels: dates,
@@ -45,8 +72,6 @@ const makeChart = (dates, values) => {
                 xAxes: [
                     {
                         ticks: {
-                            callback: (date) => formatDate(date),
-                            // remove the x-axis labels, because they look bad, and are pretty much useless when you can just hover over the graph
                             display: false,
                         },
                         gridLines: {
@@ -57,7 +82,7 @@ const makeChart = (dates, values) => {
                 yAxes: [
                     {
                         ticks: {
-                            callback: (num) => formatNum(num),
+                            callback: (num) => num.toLocaleString(d.lang, { notation: 'compact' }),
                         },
                     },
                 ],
@@ -69,12 +94,12 @@ const makeChart = (dates, values) => {
 const main = async () => {
     const data = await getData();
 
-    const get = (element) => data.map((e) => e[element]);
+    const get = (property) => data.map((element) => element[property]);
 
     makeChart(get('date'), [
-        { data: get('infected'), name: 'Nakažených', color: '#F8B425' },
-        { data: get('recoveries'), name: 'Vyléčených', color: '#049DD9' },
-        { data: get('deaths'), name: 'Zemřelých', color: '#EC4561' },
+        { data: get('infected'), name: d.infected, color: '#F8B425' },
+        { data: get('recoveries'), name: d.recoveries, color: '#049DD9' },
+        { data: get('deaths'), name: d.deaths, color: '#EC4561' },
     ]);
 };
 
